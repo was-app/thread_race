@@ -3,17 +3,23 @@
 int finished = 0;
 pthread_mutex_t finished_lock = PTHREAD_MUTEX_INITIALIZER;
 
-racer create_racer(int id){
-    racer temp;
-    temp.id = id;
+char* teams[] = {
+        "Cruzeiro", "Atletico", "Flamengo", "Vasco",
+        "Corinthians", "Palmeiras", "Gremio", "Internacional",
+        "Sao Paulo", "Santos", "Fluminense", "Botafogo"
+    };
+
+team_t create_team(char* name){
+    team_t temp = {0};
+    strcpy(temp.name,name);
     temp.time = 0.0;
     temp.counter = 0;
     return temp;
 }
 
-void *race(void *cur_racer){
+void *race(void *cur_team){
     clock_t start = clock();
-    racer* r = (racer*) cur_racer;
+    team_t* r = (team_t*) cur_team;
     while(r->counter < TARGET){
         double number = (double)rand() / RAND_MAX;
         if (number > 0.2)
@@ -24,7 +30,7 @@ void *race(void *cur_racer){
 
     pthread_mutex_lock(&finished_lock);
     finished++;
-    printf("Racer %d has finished the race in %d place, with a time of %f seconds\n",r->id, finished, r->time);
+    printf("Team %s has finished the race in %d place, with a time of %f seconds\n",r->name, finished, r->time);
     pthread_mutex_unlock(&finished_lock);
 
     pthread_exit(NULL);
@@ -32,13 +38,13 @@ void *race(void *cur_racer){
 
 int main(){
     srand(time(NULL));
-    racer racers_list[RACERS_COUNT];
-    for (int i=0;i<RACERS_COUNT;i++) {
-        racers_list[i] = create_racer(i);
-        if (pthread_create(&racers_list[i].thread, NULL, race, &racers_list[i]) != 0) 
+    team_t teams_list[TEAMS];
+    for (int i=0;i<TEAMS;i++) {
+        teams_list[i] = create_team(teams[i]);
+        if (pthread_create(&teams_list[i].thread, NULL, race, &teams_list[i]) != 0) 
             return 1;
     }
-    for (int i=0;i<RACERS_COUNT;i++)
-        pthread_join(racers_list[i].thread, NULL);
+    for (int i=0;i<TEAMS;i++)
+        pthread_join(teams_list[i].thread, NULL);
 
 }
