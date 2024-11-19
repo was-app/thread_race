@@ -30,7 +30,7 @@ void *race(void *cur_team){
 
     pthread_mutex_lock(&finished_lock);
     finished++;
-    printf("Team %s has finished the race in %d place, with a time of %f seconds\n",r->name, finished, r->time);
+    printf("%d : %s, with a time of %f seconds\n",finished, r->name, r->time);
     pthread_mutex_unlock(&finished_lock);
 
     pthread_exit(NULL);
